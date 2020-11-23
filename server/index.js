@@ -2,9 +2,9 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const cors = require('cors')
-const cookieParser = require('cookie-parser')
-const bodyParser = require('body-parser')
 const authRoutes = require("./routes/auth")
+const protectedRoutes = require("./routes/protected")
+const verifyToken = require("./routes/jwt-token")
 require('dotenv').config()
 
 const app = express()
@@ -15,12 +15,11 @@ const port = SERVER_PORT || 8000
 
 // Middlewares
 app.use(cors())
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(cookieParser())
 app.use(express.json())
 
 // Route Middlewares
 app.use("/auth/user", authRoutes)
+app.use("/auth/protected", verifyToken, protectedRoutes)
 
 // DB connection
 mongoose.connect(
