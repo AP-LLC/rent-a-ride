@@ -1,7 +1,7 @@
 const router = require("express").Router()
 
-router.get("/profile", (req, res) => {
-  res.status(200).send({
+router.get("/", (req, res) => {
+  res.json({
     data: {
       title: "My Profile",
       content: "dashboard content",

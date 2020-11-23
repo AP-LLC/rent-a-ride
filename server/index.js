@@ -1,35 +1,33 @@
 /** @format */
+require('dotenv').config()
 const express = require('express')
 const mongoose = require('mongoose')
-const cors = require('cors')
 const authRoutes = require("./routes/auth")
 const protectedRoutes = require("./routes/protected")
 const verifyToken = require("./routes/jwt-token")
-require('dotenv').config()
 
 const app = express()
 
 const { SERVER_PORT, CONNECTION_STRING } = process.env
 
-const port = SERVER_PORT || 8000
+const port = SERVER_PORT
 
-// Middlewares
-app.use(cors())
-app.use(express.json())
-
-// Route Middlewares
-app.use("/auth/user", authRoutes)
-app.use("/auth/protected", verifyToken, protectedRoutes)
-
-// DB connection
 mongoose.connect(
+// DB connection
   CONNECTION_STRING,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true
   },
   () => console.log('🚀 DB Blasting Off')
-  )
+)
+
+// Middlewares
+app.use(express.json())
+
+// Route Middlewares
+    app.use("/api/user", authRoutes)
+    app.use("/api/protected", verifyToken, protectedRoutes)
 
 // Server Port
 app.listen(port, () => {

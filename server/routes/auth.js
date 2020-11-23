@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs")
 
 const User = require("../models/User")
 
+// TODO bug on register
+// TODO hapi/joi needs more validation methods
 
 // validation :)
 const { registerValidation, loginValidation } = require("../validation");
