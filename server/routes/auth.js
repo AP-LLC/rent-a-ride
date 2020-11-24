@@ -32,7 +32,7 @@
     });
 
     try {
-      const savedUser = await user.save();
+       await user.save();
       res.status(200).send("Success")
     } catch (error) {
       res.status(400).json({ error });
