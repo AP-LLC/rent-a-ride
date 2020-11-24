@@ -62,12 +62,12 @@ app.get('/logout', (req, res) => {
 })
 
 // Startup Server and Connect DB
-app.listen(port, (err) => {
+ app.listen(port, (err) => {
   if (err) console.log('Error in server setup')
-  console.log(`👨 To Infinity & Beyond on Port => ${ port }`)
+console.log(`👨 To Infinity & Beyond on Port => ${ port }`)
 
   try {
-    mongoose.connect(uri, {
+     mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useCreateIndex: false

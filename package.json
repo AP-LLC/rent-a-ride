@@ -6,6 +6,7 @@
   "main": "server/utils/index.js",
   "dependencies": {
     "@hapi/joi": "^17.1.1",
+    "@sendgrid/mail": "^7.4.0",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.1",
     "@testing-library/user-event": "^12.2.2",
@@ -17,8 +18,12 @@
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "html-to-text": "^6.0.0",
+    "mailgen": "^2.0.14",
     "mongoose": "^5.10.15",
     "morgan": "^1.10.0",
+    "nodemailer": "^6.4.16",
+    "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^2.0.6",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
@@ -52,6 +57,7 @@
     ]
   },
   "devDependencies": {
-    "jsonwebtoken": "^8.5.1"
+    "jsonwebtoken": "^8.5.1",
+    "pug": "^3.0.0"
   }
 }
