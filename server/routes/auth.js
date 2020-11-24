@@ -5,7 +5,7 @@
   const User = require("../models/User");
 
 // validation
-  const { registerValidation, loginValidation } = require("../validation");
+  const { registerValidation, loginValidation } = require("../utils/validation");
 
 // register route
   router.post("/register", async (req, res) => {
@@ -26,8 +26,7 @@
     const password = await bcrypt.hash(req.body.password, salt);
 
     const user = new User({
-      firstName: req.body.firstName,
-      lastName: req.body.lastName,
+      name: req.body.name,
       email: req.body.email,
       password,
     });

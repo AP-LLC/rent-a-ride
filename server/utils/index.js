@@ -16,9 +16,9 @@ mongoose.connect(
 
 
 // Middlewares
-const protectedRoutes = require("./routes/protected")
-const verifyToken = require("./routes/validate-token")
-const authRoutes = require("./routes/auth")
+const protectedRoutes = require("../routes/protected")
+const verifyToken = require("../routes/validate-token")
+const authRoutes = require("../routes/auth")
 
 app.get("/", (req, res) => {
   res.json({
