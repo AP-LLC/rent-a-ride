@@ -19,18 +19,22 @@ mongoose.connect(
 const protectedRoutes = require("../routes/protected")
 const verifyToken = require("../routes/validate-token")
 const authRoutes = require("../routes/auth")
-
-app.get("/", (req, res) => {
-  res.json({
-    message: "Success"
-  })
-})
-
 app.use(express.json())
 
 // Route Middlewares
 app.use("/api/user", authRoutes)
 app.use("/api/protected", verifyToken, protectedRoutes)
+
+// Google Auth
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile'] }))
+
+app.get('/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  function(req, res) {
+
+  res.redirect('/')
+  })
 
 // Server Port
 app.listen(process.env.SERVER_PORT, () => {
