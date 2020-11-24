@@ -1,13 +1,15 @@
-const router = require("express").Router()
+const router = require("express").Router();
 
-router.get("/", (req, res) => {
+// dashboard route
+router.get("/profile", (req, res) => {
   res.json({
+    error: null,
     data: {
-      title: "My Profile",
-      content: "dashboard content",
+      title: "My profile",
+      content: "profile content",
       user: req.user,
     },
-  })
-})
+  });
+});
 
-module.exports = router
+module.exports = router;
