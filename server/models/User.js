@@ -1,23 +1,28 @@
-const mongoose = require('mongoose');
-const crypto = require('crypto')
+const mongoose = require("mongoose")
 
-
-
-const UserSchema = new mongoose.Schema({
-    username: {
-      type: String,
-      required: true
-    },
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    min: 6,
+    max: 255,
+  },
+  email: {
+    type: String,
+    required: true,
+    min: 6,
+    max: 255,
+  },
   password: {
-      type: String,
-      required: true
-  }
-}, { timeStamp: true })
+    type: String,
+    required: true,
+    min: 6,
+    max: 1024,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+})
 
-
-userSchema
-  .virtual
-
-
-module.exports = mongoose.model("User", UserSchema)
-
+module.exports = mongoose.model("User", userSchema)
