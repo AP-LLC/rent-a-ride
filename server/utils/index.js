@@ -12,6 +12,7 @@ const protectedRoutes = require('../routes/protected')
 const verifyToken = require('../routes/validate-token')
 const isLoggedIn = require('../middlewares/auth')
 const authRoutes = require('../routes/auth')
+// const payRoute = require('../routes/payment')
 
 const { SERVER_PORT, CONNECTION_STRING, COOKIE_SECRET } = process.env
 const port = SERVER_PORT || 5000
@@ -34,6 +35,7 @@ app.use(passport.session())
 // Routes Middlewares
 app.use('/api/user', authRoutes)
 app.use('/api/protected', verifyToken, protectedRoutes)
+// app.use('./api/payment', payRoute)
 
 // TODO check that the verifyToken lines up with success route
 // Routes
