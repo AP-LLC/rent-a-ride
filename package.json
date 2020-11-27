@@ -36,7 +36,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "jest --watchAll",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -58,7 +58,6 @@
     ]
   },
   "devDependencies": {
-    "jsonwebtoken": "^8.5.1",
-    "pug": "^3.0.0"
+    "jsonwebtoken": "^8.5.1"
   }
 }

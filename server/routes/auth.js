@@ -7,25 +7,25 @@ const nodemailer = require("nodemailer")
 // const Mailgen = require("mailgen")
 
 const { registerValidation, loginValidation } = require('../utils/validation')
-const { EMAIL, PASSWORD, MAIN_URL } = require('../config')
+// const { EMAIL, PASSWORD, MAIN_URL } = require('../config')
 
-
-let transporter = nodemailer.createTransport({
-  service: "Yahoo",
-  secure: true,
-  auth: {
-    user: EMAIL,
-    pass: PASSWORD,
-  }
-})
-
-let MailGenerator = new Mailgen({
-  theme: "default",
-  product: {
-    name: "Nodemailer",
-    link: MAIN_URL,
-  },
-})
+//
+// let transporter = nodemailer.createTransport({
+//   service: "Yahoo",
+//   secure: true,
+//   auth: {
+//     user: EMAIL,
+//     pass: PASSWORD,
+//   }
+// })
+//
+// let MailGenerator = new Mailgen({
+//   theme: "default",
+//   product: {
+//     name: "Nodemailer",
+//     link: MAIN_URL,
+//   },
+// })
 
 router.post('/register', async (req, res, next) => {
   const { error } = registerValidation(req.body)

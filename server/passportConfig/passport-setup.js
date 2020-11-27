@@ -23,3 +23,5 @@ passport.use(new GoogleStrategy({
     })
   }
 ))
+
+// TODO setup with facebook strategy
