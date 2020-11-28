@@ -7,18 +7,18 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const cookieSession = require('cookie-session')
 const passport = require('passport')
+const path = require('path')
 const morgan = require('morgan')
-// const protectedRoutes = require('../routes/protected')
-// const verifyToken = require('../routes/validate-token')
-// const authRoutes = require('../routes/auth')
-// const resetRoutes = require('../routes/reset')
-// const payRoute = require('../routes/payment')
+const app = express()
 
 const { SERVER_PORT, CONNECTION_STRING, COOKIE_SECRET } = process.env
-const port = SERVER_PORT || 5000
-const uri = CONNECTION_STRING
 
-const app = express()
+const port = SERVER_PORT || 5000
+
+const uri = CONNECTION_STRING
+// Template engine
+app.set('views', path.join(__dirname, 'views'))
+app.set('view engine', 'jade')
 
 // Middlewares
 app.use(morgan('dev'))
@@ -31,13 +31,12 @@ app.use(cookieSession({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+require('../routes/index')(app)
+require('../middlewares/jwt')(passport)
 
-// Routes Middlewares
 // app.use('/api/user', authRoutes)
 // app.use('/api/protected', verifyToken, protectedRoutes)
 // app.use('/api/reset', resetRoutes)
-require("../routes/index")(app)
-require("../middlewares/jwt")(passport)
 // app.use('./api/payment', payRoute)
 
 // TODO check that the verifyToken lines up with success route
@@ -72,6 +71,7 @@ app.listen(port, (err) => {
   console.log(`👨 To Infinity & Beyond on Port => ${ port }`)
 
   try {
+    mongoose.promise = global.Promise
     mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,

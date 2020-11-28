@@ -1,4 +1,3 @@
-
 const auth = require('./auth');
 const user = require('./user');
 const authenticate = require('../middlewares/authenticate');
