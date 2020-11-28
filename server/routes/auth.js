@@ -1,84 +1,41 @@
-const router = require('express').Router()
-const jwt = require('jsonwebtoken')
-const bcrypt = require('bcryptjs')
-const User = require('../models/User')
-const crypto = require('crypto');
-const nodemailer = require("nodemailer")
 
-const { registerValidation, loginValidation } = require('../utils/validation')
+const express = require('express');
+const {check} = require('express-validator');
 
+const Auth = require('../controllers/auth');
+const Password = require('../controllers/password');
+const validate = require('../middlewares/validate');
 
-router.post('/register', async (req, res, next) => {
-  const { error } = registerValidation(req.body)
+const router = express.Router();
 
-  if (error) return res.status(400).json({ error: error.details[ 0 ].message })
-
-  const isEmailExist = await User.findOne({ email: req.body.email })
-
-  if (isEmailExist)
-    return res.status(400).json({ error: 'Email already exists' })
-
-  const salt = await bcrypt.genSalt(10)
-  const password = await bcrypt.hash(req.body.password, salt)
-
-  const user = new User({
-    name: req.body.name,
-    email: req.body.email,
-    password
-  })
-
-  try {
-    await user.save()
-    res.status(200).send('Success')
-  } catch (error) {
-    res.status(400).json({ error })
-  }
-
-  const token = new Token({ _userId: user._id, token: crypto.randomBytes(16).toString('hex') });
-
-  // Save the verification token
-  token.save(function (err) {
-    if (err) { return res.status(500).send({ msg: err.message }); }
-
-    // Send the email
-    const  transporter = nodemailer.createTransport({ service: 'Sendgrid', auth: { user: process.env.SENDGRID_USERNAME, pass: process.env.SENDGRID_PASSWORD } });
-
-    const mailOptions = { from: 'matt_the_dev@yahoo.com', to: user.email, subject: 'Account Verification Token', text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n' };
-
-    transporter.sendMail(mailOptions, function (err) {
-      if (err) { return res.status(500).send({ msg: err.message }); }
-      res.status(200).send('A verification email has been sent to ' + user.email + '.');
-    });
-  });
+router.get('/', (req, res) => {
+  res.status(200).json({message: "You are in the Auth Endpoint. Register or Login to test Authentication."});
 });
 
-router.post('/login', async (req, res) => {
-  const { error } = loginValidation(req.body)
+router.post('/register', [
+  check('email').isEmail().withMessage('Enter a valid email address'),
+  check('username').not().isEmpty().withMessage('You username is required'),
+  check('password').not().isEmpty().isLength({min: 6}).withMessage('Must be at least 6 chars long'),
+  check('firstName').not().isEmpty().withMessage('You first name is required'),
+  check('lastName').not().isEmpty().withMessage('You last name is required')
+], validate, Auth.register);
 
-  if (error) return res.status(400).json({ error: error.details[ 0 ].message })
+router.post("/login", [
+  check('email').isEmail().withMessage('Enter a valid email address'),
+  check('password').not().isEmpty(),
+], validate, Auth.login);
 
-  const user = await User.findOne({ email: req.body.email })
+//Password RESET
+router.post('/recover', [
+  check('email').isEmail().withMessage('Enter a valid email address'),
+], validate, Password.recover);
 
-  if (!user) return res.status(400).json({ error: 'Email is wrong' })
+router.get('/reset/:token', Password.reset);
 
-  const validPassword = await bcrypt.compare(req.body.password, user.password)
-  if (!validPassword)
-    return res.status(400).json({ error: 'Password is wrong' })
+router.post('/reset/:token', [
+  check('password').not().isEmpty().isLength({min: 6}).withMessage('Must be at least 6 chars long'),
+  check('confirmPassword', 'Passwords do not match').custom((value, {req}) => (value === req.body.password)),
+], validate, Password.resetPassword);
 
-  const token = jwt.sign(
-    {
-      name: user.name,
-      id: user._id
-    },
-    process.env.TOKEN_SECRET
-  )
 
-  res.header('auth-token', token).json({
-    status: 200,
-    data: {
-      token
-    }
-  })
-})
-
-module.exports = router
+module.exports = router;

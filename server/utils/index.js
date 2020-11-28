@@ -8,11 +8,10 @@ const bodyParser = require('body-parser')
 const cookieSession = require('cookie-session')
 const passport = require('passport')
 const morgan = require('morgan')
-const protectedRoutes = require('../routes/protected')
-const verifyToken = require('../routes/validate-token')
-const isLoggedIn = require('../middlewares/auth')
-const authRoutes = require('../routes/auth')
-const resetRoutes = require('../routes/reset')
+// const protectedRoutes = require('../routes/protected')
+// const verifyToken = require('../routes/validate-token')
+// const authRoutes = require('../routes/auth')
+// const resetRoutes = require('../routes/reset')
 // const payRoute = require('../routes/payment')
 
 const { SERVER_PORT, CONNECTION_STRING, COOKIE_SECRET } = process.env
@@ -34,9 +33,11 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // Routes Middlewares
-app.use('/api/user', authRoutes)
-app.use('/api/protected', verifyToken, protectedRoutes)
-app.use('/api/reset', resetRoutes)
+// app.use('/api/user', authRoutes)
+// app.use('/api/protected', verifyToken, protectedRoutes)
+// app.use('/api/reset', resetRoutes)
+require("../routes/index")(app)
+require("../middlewares/jwt")(passport)
 // app.use('./api/payment', payRoute)
 
 // TODO check that the verifyToken lines up with success route
