@@ -1,6 +1,5 @@
 const router = require("express").Router();
 
-// dashboard route
 router.get("/profile", (req, res) => {
   res.json({
     error: null,

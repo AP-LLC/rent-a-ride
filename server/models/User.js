@@ -23,6 +23,19 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-})
+  passwordResetToken: {
+    type: String,
+    required: false,
+  },
+  isVerified: {
+    type: Boolean,
+    required: false,
+    default: false
+  },
+  resetPasswordExpires: {
+    type: Date,
+    required: false
+  }
+}, { timestamps: true})
 
 module.exports = mongoose.model("User", userSchema)

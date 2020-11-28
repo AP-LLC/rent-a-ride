@@ -4,28 +4,9 @@ const bcrypt = require('bcryptjs')
 const User = require('../models/User')
 const crypto = require('crypto');
 const nodemailer = require("nodemailer")
-// const Mailgen = require("mailgen")
 
 const { registerValidation, loginValidation } = require('../utils/validation')
-// const { EMAIL, PASSWORD, MAIN_URL } = require('../config')
 
-//
-// let transporter = nodemailer.createTransport({
-//   service: "Yahoo",
-//   secure: true,
-//   auth: {
-//     user: EMAIL,
-//     pass: PASSWORD,
-//   }
-// })
-//
-// let MailGenerator = new Mailgen({
-//   theme: "default",
-//   product: {
-//     name: "Nodemailer",
-//     link: MAIN_URL,
-//   },
-// })
 
 router.post('/register', async (req, res, next) => {
   const { error } = registerValidation(req.body)
@@ -70,35 +51,6 @@ router.post('/register', async (req, res, next) => {
     });
   });
 });
-// });
-// };
-//
-// })
-
-// exports.signupPost = function(req, res, next) {
-//   req.assert('name', 'Name cannot be blank').notEmpty();
-//   req.assert('email', 'Email is not valid').isEmail();
-//   req.assert('email', 'Email cannot be blank').notEmpty();
-//   req.assert('password', 'Password must be at least 4 characters long').len(4);
-//   req.sanitize('email').normalizeEmail({ remove_dots: false });
-//
-//   // Check for validation errors
-//   var errors = req.validationErrors();
-//   if (errors) { return res.status(400).send(errors); }
-//
-//   // Make sure this account doesn't already exist
-//   User.findOne({ email: req.body.email }, function (err, user) {
-//
-//     // Make sure user doesn't already exist
-//     if (user) return res.status(400).send({ msg: 'The email address you have entered is already associated with another account.' });
-//
-//     // Create and save the user
-//     user = new User({ name: req.body.name, email: req.body.email, password: req.body.password });
-//     user.save(function (err) {
-//       if (err) { return res.status(500).send({ msg: err.message }); }
-//
-//       // Create a verification token for this user
-//
 
 router.post('/login', async (req, res) => {
   const { error } = loginValidation(req.body)

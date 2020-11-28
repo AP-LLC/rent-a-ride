@@ -12,6 +12,7 @@ const protectedRoutes = require('../routes/protected')
 const verifyToken = require('../routes/validate-token')
 const isLoggedIn = require('../middlewares/auth')
 const authRoutes = require('../routes/auth')
+const resetRoutes = require('../routes/reset')
 // const payRoute = require('../routes/payment')
 
 const { SERVER_PORT, CONNECTION_STRING, COOKIE_SECRET } = process.env
@@ -35,6 +36,7 @@ app.use(passport.session())
 // Routes Middlewares
 app.use('/api/user', authRoutes)
 app.use('/api/protected', verifyToken, protectedRoutes)
+app.use('/api/reset', resetRoutes)
 // app.use('./api/payment', payRoute)
 
 // TODO check that the verifyToken lines up with success route
@@ -64,15 +66,15 @@ app.get('/logout', (req, res) => {
 })
 
 // Startup Server and Connect DB
- app.listen(port, (err) => {
+app.listen(port, (err) => {
   if (err) console.log('Error in server setup')
-console.log(`👨 To Infinity & Beyond on Port => ${ port }`)
+  console.log(`👨 To Infinity & Beyond on Port => ${ port }`)
 
   try {
-     mongoose.connect(uri, {
+    mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: false
+      useCreateIndex: true
     })
   } catch (error) {
     console.error(error)

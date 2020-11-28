@@ -18,6 +18,9 @@
     "cors": "^2.8.5",
     "crypto": "^1.0.1",
     "dotenv": "^8.2.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.5",
+    "enzyme-to-json": "^3.6.1",
     "express": "^4.17.1",
     "html-to-text": "^6.0.0",
     "mailgen": "^2.0.14",
@@ -26,11 +29,13 @@
     "nodemailer": "^6.4.16",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "nodemon": "^2.0.6",
+    "normalize.css": "^8.0.1",
     "passport": "^0.4.1",
     "passport-google-oauth20": "^2.0.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-scripts": "4.0.0",
+    "react-test-renderer": "^17.0.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
