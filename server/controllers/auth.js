@@ -1,142 +1,148 @@
 const User = require('../models/User')
-
-const sgMail = require('@sendgrid/mail')
-sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+const Token = require('../models/Token')
+const { sendEmail } = require('../utils/index')
 
 // @route POST api/auth/register
 // @desc Register user
 // @access Public
-exports.register = (req, res) => {
-  // Make sure this account doesn't already exist
-  User.findOne({ email: req.body.email }).
-    then(user => {
+exports.register = async (req, res) => {
+  try {
+    const { email } = req.body
 
-      if (user) return res.status(401).
-        json(
-          { message: 'The email address you have entered is already associated with another account.' })
+    // Make sure this account doesn't already exist
+    const user = await User.findOne({ email })
 
-      // Create and save the user
-      const newUser = new User(req.body)
-      newUser.save().
-        then(user => res.status(200).
-          json({ token: user.generateJWT(), user: user })).
-        catch(err => res.status(500).json({ message: err.message }))
-    }).
-    catch(
-      err => res.status(500).json({ success: false, message: err.message }))
+    if (user) return res.status(401).
+      json(
+        { message: 'The email address you have entered is already associated with another account.' })
+
+    const newUser = new User({ ...req.body, role: 'basic' })
+
+    const user_ = await newUser.save()
+
+    await sendVerificationEmail(user_, req, res)
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message })
+  }
 }
 
 // @route POST api/auth/login
 // @desc Login user and return JWT token
 // @access Public
-exports.login = (req, res) => {
-  User.findOne({ email: req.body.email }).then(user => {
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    const user = await User.findOne({ email })
+
     if (!user) return res.status(401).
       json({
-        msg: 'The email address ' + req.body.email +
+        msg: 'The email address ' + email +
           ' is not associated with any account. Double-check your email address and try again.'
       })
 
     //validate password
-    if (!user.comparePassword(req.body.password)) return res.status(401).
+    if (!user.comparePassword(password)) return res.status(401).
       json({ message: 'Invalid email or password' })
+
+    // Make sure the user has been verified
+    if (!user.isVerified) return res.status(401).
+      json({
+        type: 'not-verified',
+        message: 'Your account has not been verified.'
+      })
 
     // Login successful, write token, and send back user
     res.status(200).json({ token: user.generateJWT(), user: user })
-  }).catch(err => res.status(500).json({ message: err.message }))
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
 }
 
-// ===PASSWORD RECOVER AND RESET
-
-// @route POST api/auth/recover
-// @desc Recover Password - Generates token and Sends password reset email
+// ===EMAIL VERIFICATION
+// @route GET api/verify/:token
+// @desc Verify token
 // @access Public
-exports.recover = (req, res) => {
-  User.findOne({ email: req.body.email }).then(user => {
+exports.verify = async (req, res) => {
+  if (!req.params.token) return res.status(400).
+    json({ message: 'We were unable to find a user for this token.' })
+
+  try {
+    // Find a matching token
+    const token = await Token.findOne({ token: req.params.token })
+
+    if (!token) return res.status(400).
+      json(
+        { message: 'We were unable to find a valid token. Your token my have expired.' })
+
+    // If we found a token, find a matching user
+    User.findOne({ _id: token.userId }, (err, user) => {
+      if (!user) return res.status(400).
+        json({ message: 'We were unable to find a user for this token.' })
+
+      if (user.isVerified) return res.status(400).
+        json({ message: 'This user has already been verified.' })
+
+      // Verify and save the user
+      user.isVerified = true
+      user.save(function (err) {
+        if (err) return res.status(500).json({ message: err.message })
+
+        res.status(200).send('The account has been verified. Please log in.')
+      })
+    })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+// @route POST api/resend
+// @desc Resend Verification Token
+// @access Public
+exports.resendToken = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    const user = await User.findOne({ email })
+
     if (!user) return res.status(401).
       json({
         message: 'The email address ' + req.body.email +
           ' is not associated with any account. Double-check your email address and try again.'
       })
 
-    //Generate and set password reset token
-    user.generatePasswordReset()
+    if (user.isVerified) return res.status(400).
+      json(
+        { message: 'This account has already been verified. Please log in.' })
 
-    // Save the updated user object
-    user.save().then(user => {
-      // send email
-      let link = 'http://' + req.headers.host + '/api/auth/reset/' +
-        user.resetPasswordToken
-      const mailOptions = {
-        to: user.email,
-        from: process.env.FROM_EMAIL,
-        subject: 'Password change request',
-        text: `Hi ${ user.username } \n 
-                    Please click on the following link ${ link } to reset your password. \n\n 
-                    If you did not request this, please ignore this email and your password will remain unchanged.\n`
-      }
-
-      sgMail.send(mailOptions, (error, result) => {
-        if (error) return res.status(500).json({ message: error.message })
-
-        res.status(200).
-          json(
-            { message: 'A reset email has been sent to ' + user.email + '.' })
-      })
-    }).catch(err => res.status(500).json({ message: err.message }))
-  }).catch(err => res.status(500).json({ message: err.message }))
+    await sendVerificationEmail(user, req, res)
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
 }
 
-// @route POST api/auth/reset
-// @desc Reset Password - Validate password reset token and shows the password reset view
-// @access Public
-exports.reset = (req, res) => {
-  User.findOne({
-    resetPasswordToken: req.params.token,
-    resetPasswordExpires: { $gt: Date.now() }
-  }).then((user) => {
-    if (!user) return res.status(401).
-      json({ message: 'Password reset token is invalid or has expired.' })
+async function sendVerificationEmail (user, req, res) {
+  try {
+    const token = user.generateVerificationToken()
 
-    //Redirect user to form with the email address
-    res.render('reset', { user })
-  }).catch(err => res.status(500).json({ message: err.message }))
-}
+    // Save the verification token
+    await token.save()
 
-// @route POST api/auth/reset
-// @desc Reset Password
-// @access Public
-exports.resetPassword = (req, res) => {
-  User.findOne({
-    resetPasswordToken: req.params.token,
-    resetPasswordExpires: { $gt: Date.now() }
-  }).then((user) => {
-    if (!user) return res.status(401).
-      json({ message: 'Password reset token is invalid or has expired.' })
+    let subject = 'Account Verification Token'
+    let to = user.email
+    let from = process.env.FROM_EMAIL
+    let link = 'http://' + req.headers.host + '/api/auth/verify/' + token.token
+    let html = `<p>Hi ${ user.username }<p><br><p>Please click on the following <a href="${ link }">link</a> to verify your account.</p> 
+                  <br><p>If you did not request this, please ignore this email.</p>`
 
-    //Set the new password
-    user.password = req.body.password
-    user.resetPasswordToken = undefined
-    user.resetPasswordExpires = undefined
+    await sendEmail({ to, from, subject, html })
 
-    // Save
-    user.save((err) => {
-      if (err) return res.status(500).json({ message: err.message })
-
-      // send email
-      const mailOptions = {
-        to: user.email,
-        from: process.env.FROM_EMAIL,
-        subject: 'Your password has been changed',
-        text: `Hi ${ user.username } \n 
-                    This is a confirmation that the password for your account ${ user.email } has just been changed.\n`
-      }
-
-      sgMail.send(mailOptions, (error, result) => {
-        if (error) return res.status(500).json({ message: error.message })
-
-        res.status(200).json({ message: 'Your password has been updated.' })
+    res.status(200).
+      json({
+        message: 'A verification email has been sent to ' + user.email + '.'
       })
-    })
-  })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
 }

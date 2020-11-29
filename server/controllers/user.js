@@ -1,5 +1,5 @@
 const User = require('../models/User')
-const { uploader, sendEmail } = require('../config/index')
+const { uploader, sendEmail } = require('../utils/index')
 
 // @route GET admin/user
 // @desc Returns all users
