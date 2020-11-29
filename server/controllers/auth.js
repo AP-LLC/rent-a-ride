@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const Token = require('../models/Token')
 const { sendEmail } = require('../utils/index')
+const ejs = require('ejs')
 
 // @route POST api/auth/register
 // @desc Register user
@@ -129,12 +130,18 @@ async function sendVerificationEmail (user, req, res) {
     // Save the verification token
     await token.save()
 
-    let subject = 'Account Verification Token'
-    let to = user.email
-    let from = process.env.FROM_EMAIL
-    let link = 'http://' + req.headers.host + '/api/auth/verify/' + token.token
-    let html = `<p>Hi ${ user.username }<p><br><p>Please click on the following <a href="${ link }">link</a> to verify your account.</p> 
-                  <br><p>If you did not request this, please ignore this email.</p>`
+    const subject = 'Account Verification Token'
+    const to = user.email
+    const link = 'http://' + req.headers.host + '/api/auth/verify/' +
+      token.token
+    const from = process.env.FROM_EMAIL
+    const html = ejs.renderFile('/views/email-template.ejs', {
+      redirectLink: link,
+      user: user.username
+    })
+    html
+    // let html = `<p>Hi ${ user.username }<p><br><p>Please click on the following <a href="${ link }">link</a> to verify your account.</p>
+    //               <br><p>If you did not request this, please ignore this email.</p>`
 
     await sendEmail({ to, from, subject, html })
 
@@ -146,3 +153,5 @@ async function sendVerificationEmail (user, req, res) {
     res.status(500).json({ message: error.message })
   }
 }
+
+// TODO make a post request for a weekly subscription email

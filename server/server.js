@@ -28,8 +28,8 @@ app.use(express.json())
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'jade')
+app.set('views', './views')
+app.set('view engine', 'ejs')
 
 // Routes
 app.get('/', (req, res) => res.send('You are not logged in!'))
@@ -65,7 +65,7 @@ app.listen(port, (err) => {
   console.log(`👨 To Infinity & Beyond on Port => ${ port }`)
 
   try {
-    mongoose.promise = global.Promise
+    // mongoose.promise = global.Promise
     mongoose.connect(uri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
