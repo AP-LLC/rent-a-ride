@@ -7,7 +7,6 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const cookieSession = require('cookie-session')
 const passport = require('passport')
-const path = require('path')
 const morgan = require('morgan')
 
 const { SERVER_PORT, CONNECTION_STRING, COOKIE_SECRET } = process.env
